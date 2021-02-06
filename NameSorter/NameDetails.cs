@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace NameSorter
 {
@@ -234,6 +235,46 @@ namespace NameSorter
 	    public void saveNamesToFile(String fileName, List<NameDetails> names);
     }
 
+    public class NameSorterFileUtils : INameSorterFileUtils
+    {
+        private readonly NameSorterLinesProcess LinesProcess;
+        public NameSorterFileUtils(NameSorterLinesProcess lineProcess)
+        {
+            LinesProcess = lineProcess;
+        }
+        public Boolean checkFileNameExists(String fileName)
+        {
+            Boolean exists = File.Exists(fileName);
+
+            return exists;
+        }
+	    public List<NameDetails> loadNamesFromFile(String fileName)
+        {
+            string[] LinesAsArray = File.ReadAllLines(fileName); 
+
+            List<String> Lines = new List<String>();
+            Lines.AddRange(LinesAsArray);
+
+            List<NameDetails> names = LinesProcess.ParseFromText(Lines);
+
+            return names;
+        }
+	    public void saveNamesToFile(String fileName, List<NameDetails> names)
+        {
+
+            List<String> lines = LinesProcess.GenerateLines(names);
+
+            using (StreamWriter outputFile = new StreamWriter(fileName))
+            {
+                foreach (string line in lines)
+                {
+                    outputFile.WriteLine(line);
+                }
+            }
+        }
+    }
+
+
     public interface INameSorterScreenUtils
     {
         public void writeToScreen(List<NameDetails> names);
@@ -264,6 +305,26 @@ namespace NameSorter
     {
         public void recordInterestingEvent(String line);
 	    public void dumpHistory();
+    }
+
+    public class ExecutionState : IExecutionState
+    {
+
+        private readonly List<String> events;
+
+        public ExecutionState()
+        {
+            events = new List<String>();
+        }
+
+        public void recordInterestingEvent(String line)
+        {
+
+        }
+	    public void dumpHistory()
+        {
+
+        }
     }
 
     public class NameSorterCommand
